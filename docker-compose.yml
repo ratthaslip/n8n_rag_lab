@@ -1,0 +1,31 @@
+# QE830 แลบ n8n + RAG: รัน n8n และ Qdrant
+# วิธีใช้:  docker compose up -d     หยุด:  docker compose down
+# Ollama และ FastAPI รันบนเครื่องเรา (ไม่อยู่ในไฟล์นี้) n8n เรียกผ่าน host.docker.internal
+
+services:
+  n8n:
+    image: docker.n8n.io/n8nio/n8n:latest
+    container_name: qe830-n8n
+    restart: unless-stopped
+    ports:
+      - "5678:5678"
+    environment:
+      - GENERIC_TIMEZONE=Asia/Bangkok
+      - TZ=Asia/Bangkok
+    volumes:
+      - n8n_data:/home/node/.n8n        # เก็บ workflow และ credential ไม่ให้หายเมื่อลบ container
+    extra_hosts:
+      - "host.docker.internal:host-gateway"   # จำเป็นบน Linux, Windows/macOS ใส่ไว้ได้ไม่มีผลเสีย
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: qe830-qdrant
+    restart: unless-stopped
+    ports:
+      - "6333:6333"                     # REST API + dashboard (http://localhost:6333/dashboard)
+    volumes:
+      - qdrant_data:/qdrant/storage     # เก็บ vector ไม่ให้หายเมื่อลบ container
+
+volumes:
+  n8n_data:
+  qdrant_data:
